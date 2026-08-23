@@ -1,5 +1,13 @@
 // Omix SACCO - Neon PostgreSQL Schema
-// Run: npx prisma db push
+//
+// The application data layer uses raw SQL via `pg` (see src/lib/db.ts); nothing
+// imports @prisma/client today. This schema documents the data model and can be
+// applied with `npx prisma db push`, OR use prisma/migrations/001_init.sql.
+//
+// NOTE: pick ONE source of truth per database. The SQL migration models enums
+// as CHECK-constrained VARCHAR columns, while this file declares native
+// PostgreSQL enum types — running `db push` against a DB created from the SQL
+// migration will convert those columns to native enums (drift).
 
 generator client {
   provider = "prisma-client-js"
