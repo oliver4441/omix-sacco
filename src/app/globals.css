@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --omix-navy: #0a0f1a;
+  --omix-accent: #f97316;
+  --omix-accent-dark: #ea580c;
+  --omix-cyan: #00bcd4;
+  --omix-dark: #0f172a;
+}
+
+body {
+  background-color: var(--omix-navy);
+  color: #e2e8f0;
+}
+
+@layer utilities {
+  .text-gradient-accent {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-500;
+  }
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+  .glow-cyan {
+    box-shadow: 0 0 40px rgba(0, 188, 212, 0.15);
+  }
+  .glow-accent {
+    box-shadow: 0 0 40px rgba(249, 115, 22, 0.15);
+  }
+  .dashboard-pattern {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+    background-size: 40px 40px;
+  }
+}

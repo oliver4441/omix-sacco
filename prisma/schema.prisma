@@ -1,0 +1,138 @@
+// Omix SACCO - Neon PostgreSQL Schema
+//
+// The application data layer uses raw SQL via `pg` (see src/lib/db.ts); nothing
+// imports @prisma/client today. This schema documents the data model and can be
+// applied with `npx prisma db push`, OR use prisma/migrations/001_init.sql.
+//
+// NOTE: pick ONE source of truth per database. The SQL migration models enums
+// as CHECK-constrained VARCHAR columns, while this file declares native
+// PostgreSQL enum types — running `db push` against a DB created from the SQL
+// migration will convert those columns to native enums (drift).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(gen_random_uuid()) @db.Uuid
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  fullName      String?   @map("full_name")
+  phone         String?
+  avatarUrl     String?   @map("avatar_url")
+  role          UserRole  @default(MEMBER)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  savings       Savings[]
+  loans         Loan[]
+  transactions  Transaction[]
+  guarantorFor  Guarantor[] @relation("GuarantorUser")
+
+  @@map("users")
+}
+
+model Savings {
+  id              String          @id @default(gen_random_uuid()) @db.Uuid
+  userId          String          @map("user_id") @db.Uuid
+  amount          Decimal         @db.Decimal(12, 2)
+  transactionType SavingsType     @map("transaction_type")
+  status          SavingsStatus   @default(COMPLETED)
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("savings")
+}
+
+model Loan {
+  id              String      @id @default(gen_random_uuid()) @db.Uuid
+  userId          String      @map("user_id") @db.Uuid
+  amount          Decimal     @db.Decimal(12, 2)
+  interestRate    Decimal     @map("interest_rate") @db.Decimal(5, 2)
+  durationMonths  Int         @map("duration_months")
+  purpose         String?
+  status          LoanStatus  @default(PENDING)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guarantors      Guarantor[]
+
+  @@map("loans")
+}
+
+model Transaction {
+  id            String            @id @default(gen_random_uuid()) @db.Uuid
+  userId        String            @map("user_id") @db.Uuid
+  type          TransactionType
+  amount        Decimal           @db.Decimal(12, 2)
+  mpesaReceipt  String?           @unique @map("mpesa_receipt")
+  status        TransactionStatus @default(PENDING)
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+model Guarantor {
+  id          String          @id @default(gen_random_uuid()) @db.Uuid
+  loanId      String          @map("loan_id") @db.Uuid
+  guarantorId String          @map("guarantor_id") @db.Uuid
+  status      GuarantorStatus @default(PENDING)
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  loan        Loan            @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  guarantor   User            @relation("GuarantorUser", fields: [guarantorId], references: [id], onDelete: Cascade)
+
+  @@unique([loanId, guarantorId])
+  @@map("guarantors")
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  MEMBER
+}
+
+enum SavingsType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum SavingsStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum LoanStatus {
+  PENDING
+  APPROVED
+  DISBURSED
+  REPAID
+  REJECTED
+}
+
+enum TransactionType {
+  SAVINGS
+  LOAN_REPAYMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum GuarantorStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

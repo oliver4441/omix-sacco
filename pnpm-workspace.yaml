@@ -1,0 +1,4 @@
+# pnpm v10+ build-script approval for native dependencies used by Next.js/eslint-config-next
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver
