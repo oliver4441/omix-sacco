@@ -25,8 +25,15 @@ ALTER TABLE users
 
 -- Backfill member_no for existing rows. New signups get their number from an
 -- app-layer sequence; re-running this only fills rows that are still NULL.
-UPDATE users SET member_no = 'OMX-' || LPAD((ROW_NUMBER() OVER (ORDER BY created_at))::text, 6, '0')
-WHERE member_no IS NULL;
+WITH numbered AS (
+  SELECT id, ROW_NUMBER() OVER (ORDER BY created_at) AS rn
+  FROM users
+  WHERE member_no IS NULL
+)
+UPDATE users u
+SET member_no = 'OMX-' || LPAD(n.rn::text, 6, '0')
+FROM numbered n
+WHERE u.id = n.id;
 
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
 
