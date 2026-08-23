@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
         { loanId: created.id, amount: plan.guaranteedAmount }
       );
     }
-    await audit(session.userId, 'LOAN_APPLY', 'loan', created.id, {
+    await audit(session.userId, 'LOAN_APPLY', 'loan', String(created.id ?? ''), {
       amount,
       durationMonths,
       loanType,
