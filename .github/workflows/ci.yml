@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      JWT_SECRET: ci-secret-not-real
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -14,7 +17,5 @@ jobs:
           node-version: 20
       - name: Install deps
         run: npm install --legacy-peer-deps || npm install
-      - name: Typecheck
-        run: npx tsc --noEmit || true
       - name: Build
         run: npx next build
