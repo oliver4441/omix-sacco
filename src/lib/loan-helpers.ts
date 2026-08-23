@@ -82,7 +82,7 @@ export const loanActionSchema = z.object({
 
 /** 400 response with flattened zod issues (matches codebase error convention). */
 export function zodFail(result: z.SafeParseReturnType<unknown, unknown>) {
-  const flat = result.error.flatten().fieldErrors;
+  const flat = result.error?.flatten().fieldErrors ?? {};
   return Response.json({ error: 'Validation failed', issues: flat }, { status: 400 });
 }
 
