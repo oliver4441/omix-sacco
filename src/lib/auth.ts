@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { query } from './db';
-import { createToken, type JWTPayload } from './jwt';
+import { createToken, verifyToken, type JWTPayload } from './jwt';
 
 // Re-export so existing imports from '@/lib/auth' keep working.
 // NOTE: verifyToken lives in './jwt' (edge-safe) — middleware must import it
