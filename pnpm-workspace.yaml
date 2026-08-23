@@ -1,3 +1,4 @@
-allowBuilds:
-  sharp: set this to true or false
-  unrs-resolver: set this to true or false
+# pnpm v10+ build-script approval for native dependencies used by Next.js/eslint-config-next
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver

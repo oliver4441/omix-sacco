@@ -13,7 +13,14 @@
 
 const { Composio } = require('@composio/core');
 
-const API_KEY = 'ak_EZRXzJUmsSN9OEMIfmNZ';
+// SECURITY: never hardcode API keys in source control.
+// Set COMPOSIO_API_KEY in your environment (and revoke any key that was ever committed).
+const API_KEY = process.env.COMPOSIO_API_KEY;
+if (!API_KEY) {
+  console.error('Error: COMPOSIO_API_KEY environment variable is required.');
+  console.error('Get one at https://app.composio.dev and run: COMPOSIO_API_KEY=ak_... node scripts/composio.js');
+  process.exit(1);
+}
 const composio = new Composio({ apiKey: API_KEY });
 
 async function main() {

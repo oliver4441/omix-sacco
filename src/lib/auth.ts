@@ -1,18 +1,13 @@
-import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { query } from './db';
+import { createToken, type JWTPayload } from './jwt';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'omix-sacco-jwt-secret-key'
-);
-
-export interface JWTPayload {
-  userId: string;
-  email: string;
-  role: 'admin' | 'staff' | 'member';
-  fullName: string | null;
-}
+// Re-export so existing imports from '@/lib/auth' keep working.
+// NOTE: verifyToken lives in './jwt' (edge-safe) — middleware must import it
+// from there, NOT from this file, which pulls in `pg` and `next/headers`.
+export { createToken, verifyToken } from './jwt';
+export type { JWTPayload } from './jwt';
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -20,23 +15,6 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
-}
-
-export async function createToken(payload: JWTPayload): Promise<string> {
-  return new SignJWT({ ...payload })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(JWT_SECRET);
-}
-
-export async function verifyToken(token: string): Promise<JWTPayload | null> {
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as unknown as JWTPayload;
-  } catch {
-    return null;
-  }
 }
 
 export async function getSession(): Promise<JWTPayload | null> {
@@ -86,7 +64,7 @@ export async function createUser(
   email: string,
   password: string,
   fullName: string,
-  role: 'member' = 'member'
+  role: 'MEMBER' = 'MEMBER'
 ): Promise<JWTPayload | null> {
   const passwordHash = await hashPassword(password);
   
