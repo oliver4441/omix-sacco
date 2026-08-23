@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from './lib/auth';
+// Import from './lib/jwt' — NOT './lib/auth'. Middleware runs on the Edge
+// runtime, where `pg` (imported transitively by auth.ts) cannot be bundled.
+import { verifyToken } from './lib/jwt';
 
-const publicPaths = ['/', '/login', '/signup'];
 const authPaths = ['/login', '/signup'];
 
 export async function middleware(request: NextRequest) {
