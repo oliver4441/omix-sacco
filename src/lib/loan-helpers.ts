@@ -104,7 +104,7 @@ export class HttpError extends Error {
 
 /** Minimal executor interface so helpers run on the pool OR inside a tx client. */
 export interface QueryExecutor {
-  query: (text: string, params?: unknown[]) => Promise<{ rows: any[]; rowCount: number | null }>;
+  query: (text: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[]; rowCount: number | null }>;
 }
 
 /**
